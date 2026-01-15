@@ -133,21 +133,33 @@ function canAttack(fromCoord, toCoord, pieceType) {
 
 // Alternative: Monitor move list for rook captures
 let moveListObserver = null;
+let isMonitoringMoveList = false;
 
 function monitorMoveList() {
+  // Prevent multiple simultaneous attempts to monitor
+  if (isMonitoringMoveList) {
+    console.log('RookSacAlert: Already monitoring, skipping duplicate setup');
+    return;
+  }
+
   // Try multiple selectors for different chess.com layouts
   const moveList = document.querySelector('.move-list-component') ||
                     document.querySelector('vertical-move-list') ||
+                    document.querySelector('wc-mode-swap-move-list') ||
                     document.querySelector('.moves') ||
                     document.querySelector('[class*="move-list"]');
 
   if (!moveList) {
     console.log('RookSacAlert: Move list not found, retrying...');
     // Retry after a delay if move list not found yet
-    setTimeout(monitorMoveList, 2000);
+    setTimeout(() => {
+      isMonitoringMoveList = false;
+      monitorMoveList();
+    }, 2000);
     return;
   }
 
+  isMonitoringMoveList = true;
   console.log('RookSacAlert: Monitoring move list:', moveList);
 
   // Disconnect existing observer if any
@@ -155,11 +167,19 @@ function monitorMoveList() {
     moveListObserver.disconnect();
   }
 
+  let lastProcessedMove = '';
+
   moveListObserver = new MutationObserver((mutations) => {
     mutations.forEach(mutation => {
       mutation.addedNodes.forEach(node => {
         if (node.nodeType === 1) {
           const moveText = node.textContent || '';
+
+          // Skip if empty or already processed in this batch
+          if (!moveText.trim() || moveText === lastProcessedMove) {
+            return;
+          }
+
           console.log('RookSacAlert: New move detected:', moveText);
 
           // Check if this node has a rook icon/indicator
@@ -176,9 +196,13 @@ function monitorMoveList() {
           // Check for explicit rook notation (Rxe5) OR rook icon + capture
           const isRookCapture = /R[a-h]?x/.test(moveText) || (hasRookIcon && isCapture);
 
-          if (isRookCapture && !processedMoves.has(moveText)) {
+          // Create unique key for this move
+          const moveKey = moveText.trim() + '_' + Date.now();
+
+          if (isRookCapture && !processedMoves.has(moveText.trim())) {
             console.log('RookSacAlert: ROOK SACRIFICE DETECTED!', moveText, 'hasRookIcon:', !!hasRookIcon);
-            processedMoves.add(moveText);
+            processedMoves.add(moveText.trim());
+            lastProcessedMove = moveText;
             playRookSacrificeVideo(moveText.trim());
           }
         }
