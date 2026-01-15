@@ -138,7 +138,6 @@ let isMonitoringMoveList = false;
 function monitorMoveList() {
   // Prevent multiple simultaneous attempts to monitor
   if (isMonitoringMoveList) {
-    console.log('RookSacAlert: Already monitoring, skipping duplicate setup');
     return;
   }
 
@@ -154,13 +153,11 @@ function monitorMoveList() {
   if (moveList && moveList.tagName === 'WC-MODE-SWAP-MOVE-LIST') {
     const inner = moveList.querySelector('wc-simple-move-list');
     if (inner) {
-      console.log('RookSacAlert: Using inner wc-simple-move-list');
       moveList = inner;
     }
   }
 
   if (!moveList) {
-    console.log('RookSacAlert: Move list not found, retrying...');
     // Retry after a delay if move list not found yet
     setTimeout(() => {
       isMonitoringMoveList = false;
@@ -170,7 +167,6 @@ function monitorMoveList() {
   }
 
   isMonitoringMoveList = true;
-  console.log('RookSacAlert: Monitoring move list:', moveList);
 
   // Disconnect existing observer if any
   if (moveListObserver) {
@@ -191,8 +187,6 @@ function monitorMoveList() {
         return;
       }
 
-      console.log('RookSacAlert: Selected move detected:', moveText);
-
       // Check if this move has a rook icon
       const hasRookIcon = selectedMove.querySelector('.icon-font-chess.rook-white') ||
                           selectedMove.querySelector('.icon-font-chess.rook-black') ||
@@ -201,13 +195,10 @@ function monitorMoveList() {
       // Check for captures (x in the notation)
       const isCapture = /x/.test(moveText);
 
-      console.log('RookSacAlert: Move analysis - hasRookIcon:', !!hasRookIcon, 'isCapture:', isCapture);
-
       // Check for explicit rook notation (Rxe5) OR rook icon + capture
       const isRookCapture = /R[a-h]?x/.test(moveText) || (hasRookIcon && isCapture);
 
       if (isRookCapture && !processedMoves.has(moveText.trim())) {
-        console.log('RookSacAlert: ROOK SACRIFICE DETECTED!', moveText);
         processedMoves.add(moveText.trim());
         lastProcessedMove = moveText.trim();
         playRookSacrificeVideo(moveText.trim());
@@ -242,16 +233,11 @@ new MutationObserver(() => {
 
 // Play the video overlay
 function playRookSacrificeVideo(moveText = "Rook sacrifice") {
-  console.log('RookSacAlert: playRookSacrificeVideo called with:', moveText);
-
   // Avoid playing multiple times in quick succession
   if (window.rookSacVideoPlaying) {
-    console.log('RookSacAlert: Video already playing, skipping');
     return;
   }
   window.rookSacVideoPlaying = true;
-
-  console.log('RookSacAlert: Creating video overlay...');
 
   // Notify popup about the sacrifice (ignore errors if popup closed)
   chrome.runtime.sendMessage({
@@ -263,12 +249,10 @@ function playRookSacrificeVideo(moveText = "Rook sacrifice") {
   // Check if sound is enabled
   chrome.storage.local.get({ enableSound: true }, (result) => {
     const muted = !result.enableSound;
-    console.log('RookSacAlert: Sound setting - muted:', muted);
 
     // Remove any existing overlay first
     const existingOverlay = document.getElementById('rook-sac-overlay');
     if (existingOverlay) {
-      console.log('RookSacAlert: Removing existing overlay');
       existingOverlay.remove();
     }
 
@@ -276,7 +260,6 @@ function playRookSacrificeVideo(moveText = "Rook sacrifice") {
     const overlay = document.createElement('div');
     overlay.id = 'rook-sac-overlay';
     const videoUrl = chrome.runtime.getURL('assets/THE_ROOK.mp4');
-    console.log('RookSacAlert: Video URL:', videoUrl);
 
     overlay.innerHTML = `
       <div class="rook-sac-video-container">
@@ -287,10 +270,8 @@ function playRookSacrificeVideo(moveText = "Rook sacrifice") {
     `;
 
     document.body.appendChild(overlay);
-    console.log('RookSacAlert: Overlay appended to body');
 
     const video = document.getElementById('rook-sac-video');
-    console.log('RookSacAlert: Video element:', video);
 
     const cleanupOverlay = () => {
       const overlayElement = document.getElementById('rook-sac-overlay');
@@ -320,7 +301,6 @@ function playRookSacrificeVideo(moveText = "Rook sacrifice") {
 
 // Initialize detection
 function init() {
-  console.log('Rook Sacrifice Detector initialized on chess.com');
 
   // Monitor move list for rook captures (primary detection method)
   monitorMoveList();
