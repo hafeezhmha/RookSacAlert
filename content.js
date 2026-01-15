@@ -208,9 +208,16 @@ new MutationObserver(() => {
 
 // Play the video overlay
 function playRookSacrificeVideo(moveText = "Rook sacrifice") {
+  console.log('RookSacAlert: playRookSacrificeVideo called with:', moveText);
+
   // Avoid playing multiple times in quick succession
-  if (window.rookSacVideoPlaying) return;
+  if (window.rookSacVideoPlaying) {
+    console.log('RookSacAlert: Video already playing, skipping');
+    return;
+  }
   window.rookSacVideoPlaying = true;
+
+  console.log('RookSacAlert: Creating video overlay...');
 
   // Notify popup about the sacrifice (ignore errors if popup closed)
   chrome.runtime.sendMessage({
@@ -222,27 +229,34 @@ function playRookSacrificeVideo(moveText = "Rook sacrifice") {
   // Check if sound is enabled
   chrome.storage.local.get({ enableSound: true }, (result) => {
     const muted = !result.enableSound;
+    console.log('RookSacAlert: Sound setting - muted:', muted);
 
     // Remove any existing overlay first
     const existingOverlay = document.getElementById('rook-sac-overlay');
     if (existingOverlay) {
+      console.log('RookSacAlert: Removing existing overlay');
       existingOverlay.remove();
     }
 
     // Create overlay
     const overlay = document.createElement('div');
     overlay.id = 'rook-sac-overlay';
+    const videoUrl = chrome.runtime.getURL('assets/THE_ROOK.mp4');
+    console.log('RookSacAlert: Video URL:', videoUrl);
+
     overlay.innerHTML = `
       <div class="rook-sac-video-container">
         <video autoplay ${muted ? 'muted' : ''} id="rook-sac-video">
-          <source src="${chrome.runtime.getURL('assets/THE_ROOK.mp4')}" type="video/mp4">
+          <source src="${videoUrl}" type="video/mp4">
         </video>
       </div>
     `;
 
     document.body.appendChild(overlay);
+    console.log('RookSacAlert: Overlay appended to body');
 
     const video = document.getElementById('rook-sac-video');
+    console.log('RookSacAlert: Video element:', video);
 
     const cleanupOverlay = () => {
       const overlayElement = document.getElementById('rook-sac-overlay');
