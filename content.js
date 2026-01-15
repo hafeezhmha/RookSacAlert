@@ -184,8 +184,9 @@ function monitorMoveList() {
 
           // Check if this node has a rook icon/indicator
           const hasRookIcon = node.querySelector && (
-            node.querySelector('[data-piece="r"]') ||
-            node.querySelector('.icon-font-chess-rook') ||
+            node.querySelector('.icon-font-chess.rook-white') ||
+            node.querySelector('.icon-font-chess.rook-black') ||
+            node.querySelector('[data-figurine="R"]') ||
             node.querySelector('[class*="rook"]') ||
             (node.className && node.className.includes && node.className.includes('rook'))
           );
