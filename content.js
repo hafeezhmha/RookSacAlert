@@ -193,6 +193,8 @@ function monitorMoveList() {
           // Check for captures (x in the notation)
           const isCapture = /x/.test(moveText);
 
+          console.log('RookSacAlert: Move analysis - hasRookIcon:', !!hasRookIcon, 'isCapture:', isCapture, 'node:', node);
+
           // Check for explicit rook notation (Rxe5) OR rook icon + capture
           const isRookCapture = /R[a-h]?x/.test(moveText) || (hasRookIcon && isCapture);
 
