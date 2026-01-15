@@ -143,11 +143,21 @@ function monitorMoveList() {
   }
 
   // Try multiple selectors for different chess.com layouts
-  const moveList = document.querySelector('.move-list-component') ||
-                    document.querySelector('vertical-move-list') ||
-                    document.querySelector('wc-mode-swap-move-list') ||
-                    document.querySelector('.moves') ||
-                    document.querySelector('[class*="move-list"]');
+  let moveList = document.querySelector('.move-list-component') ||
+                 document.querySelector('vertical-move-list') ||
+                 document.querySelector('wc-mode-swap-move-list') ||
+                 document.querySelector('wc-simple-move-list') ||
+                 document.querySelector('.moves') ||
+                 document.querySelector('[class*="move-list"]');
+
+  // If we found wc-mode-swap-move-list, check if it has wc-simple-move-list inside
+  if (moveList && moveList.tagName === 'WC-MODE-SWAP-MOVE-LIST') {
+    const inner = moveList.querySelector('wc-simple-move-list');
+    if (inner) {
+      console.log('RookSacAlert: Using inner wc-simple-move-list');
+      moveList = inner;
+    }
+  }
 
   if (!moveList) {
     console.log('RookSacAlert: Move list not found, retrying...');
