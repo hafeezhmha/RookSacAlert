@@ -199,9 +199,37 @@ function monitorMoveList() {
       const isRookCapture = /R[a-h]?x/.test(moveText) || (hasRookIcon && isCapture);
 
       if (isRookCapture && !processedMoves.has(moveText.trim())) {
-        processedMoves.add(moveText.trim());
-        lastProcessedMove = moveText.trim();
-        playRookSacrificeVideo(moveText.trim());
+        // Check what piece was captured - a sacrifice only happens if rook takes something less valuable
+        const capturedPieceIcon = selectedMove.querySelector('[class*="captured"]');
+        let isSacrifice = true; // Default to true if we can't determine captured piece
+
+        if (capturedPieceIcon) {
+          // Check if captured piece is a rook or queen (equal or higher value)
+          const isRookCaptured = capturedPieceIcon.classList.contains('rook-white') ||
+                                 capturedPieceIcon.classList.contains('rook-black');
+          const isQueenCaptured = capturedPieceIcon.classList.contains('queen-white') ||
+                                  capturedPieceIcon.classList.contains('queen-black');
+
+          // Not a sacrifice if we captured a rook or queen
+          if (isRookCaptured || isQueenCaptured) {
+            isSacrifice = false;
+          }
+        } else {
+          // Alternative: check the move notation for what was captured
+          // Pattern like "Rxr5" (lowercase r) means rook takes rook
+          const capturedRook = /R[a-h]?xr/i.test(moveText) && moveText.match(/x[a-h]?\d/);
+          const capturedQueen = /R[a-h]?xq/i.test(moveText);
+
+          if (capturedRook || capturedQueen) {
+            isSacrifice = false;
+          }
+        }
+
+        if (isSacrifice) {
+          processedMoves.add(moveText.trim());
+          lastProcessedMove = moveText.trim();
+          playRookSacrificeVideo(moveText.trim());
+        }
       }
     }
   });
