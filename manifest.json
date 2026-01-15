@@ -1,6 +1,6 @@
 {
   "manifest_version": 3,
-  "name": "Chess.com Rook Sacrifice Detector",
+  "name": "RookSacAlert",
   "version": "1.0",
   "description": "Automatically plays a video when a rook sacrifice occurs on chess.com",
   "permissions": ["activeTab", "storage"],

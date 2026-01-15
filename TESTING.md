@@ -1,4 +1,4 @@
-# Testing Instructions for Chess.com Rook Sacrifice Detector
+# Testing Instructions for RookSacAlert
 
 ## Installation
 

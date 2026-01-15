@@ -1,3 +1,3 @@
 chrome.runtime.onInstalled.addListener(() => {
-  console.log("Chess.com Rook Sacrifice Detector Extension Installed");
+  console.log("RookSacAlert Extension Installed");
 });

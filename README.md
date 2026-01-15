@@ -1,4 +1,4 @@
-# Chess.com Rook Sacrifice Detector Chrome Extension
+# RookSacAlert
 
 ## Overview
 
