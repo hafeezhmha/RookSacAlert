@@ -1,0 +1,107 @@
+body {
+  background-color: rgb(44, 44, 44);
+  color: #ffffff;
+  width: 400px;
+  padding: 10px;
+}
+
+.remove-button {
+  border: none;
+  padding: 0;
+  cursor: pointer;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  background: none;
+  height: 100%;
+  margin-left: 20px;
+}
+
+.remove-button img {
+  width: 24px;
+  height: 24px;
+}
+
+.remove-button:hover img {
+  opacity: 0.8;
+}
+
+.post {
+  display: flex;
+  align-items: center;
+}
+
+.postname {
+  text-decoration: none;
+  color: rgb(255, 159, 91);
+}
+
+#savePost {
+  background-color: white;
+  border-radius: 20px;
+  border: none;
+  padding: 10px;
+  font-weight: bold;
+  background-color: rgb(255, 159, 91);
+  color: white;
+  cursor: pointer;
+}
+
+.lbr {
+  color: white;
+  width: 100%;
+  margin: 20px 0px;
+}
+
+.coffee {
+  border: 1px solid yellow;
+  border-radius: 10px;
+  padding: 5px;
+  position: absolute;
+  top: 20px;
+  right: 20px;
+  text-decoration: none;
+  color: white;
+  font-weight: bold;
+}
+
+#github {
+  top: 60px;
+  border: 1px solid rgb(118, 87, 255);
+}
+
+.disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+.status-text {
+  font-size: 14px;
+  color: rgb(180, 180, 180);
+  margin: 10px 0;
+}
+
+.empty-state {
+  color: rgb(180, 180, 180);
+  font-style: italic;
+  padding: 10px;
+}
+
+.settings {
+  margin-top: 20px;
+  padding: 10px;
+  border-top: 1px solid rgb(80, 80, 80);
+}
+
+.settings label {
+  display: flex;
+  align-items: center;
+  cursor: pointer;
+  color: white;
+  font-size: 14px;
+}
+
+.settings input[type="checkbox"] {
+  margin-right: 8px;
+  cursor: pointer;
+}
