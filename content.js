@@ -180,49 +180,39 @@ function monitorMoveList() {
   let lastProcessedMove = '';
 
   moveListObserver = new MutationObserver((mutations) => {
-    console.log('RookSacAlert: Mutations detected:', mutations.length);
-    mutations.forEach(mutation => {
-      console.log('RookSacAlert: Mutation type:', mutation.type, 'addedNodes:', mutation.addedNodes.length);
-      mutation.addedNodes.forEach(node => {
-        if (node.nodeType === 1) {
-          const moveText = node.textContent || '';
+    // Check the entire move list for the latest move with selected class
+    const selectedMove = moveList.querySelector('.node.selected, .selected');
 
-          // Skip if empty or already processed in this batch
-          if (!moveText.trim() || moveText === lastProcessedMove) {
-            return;
-          }
+    if (selectedMove) {
+      const moveText = selectedMove.textContent || '';
 
-          console.log('RookSacAlert: New move detected:', moveText);
+      // Skip if empty or already processed
+      if (!moveText.trim() || moveText.trim() === lastProcessedMove) {
+        return;
+      }
 
-          // Check if this node has a rook icon/indicator
-          const hasRookIcon = node.querySelector && (
-            node.querySelector('.icon-font-chess.rook-white') ||
-            node.querySelector('.icon-font-chess.rook-black') ||
-            node.querySelector('[data-figurine="R"]') ||
-            node.querySelector('[class*="rook"]') ||
-            (node.className && node.className.includes && node.className.includes('rook'))
-          );
+      console.log('RookSacAlert: Selected move detected:', moveText);
 
-          // Check for captures (x in the notation)
-          const isCapture = /x/.test(moveText);
+      // Check if this move has a rook icon
+      const hasRookIcon = selectedMove.querySelector('.icon-font-chess.rook-white') ||
+                          selectedMove.querySelector('.icon-font-chess.rook-black') ||
+                          selectedMove.querySelector('[data-figurine="R"]');
 
-          console.log('RookSacAlert: Move analysis - hasRookIcon:', !!hasRookIcon, 'isCapture:', isCapture, 'node:', node);
+      // Check for captures (x in the notation)
+      const isCapture = /x/.test(moveText);
 
-          // Check for explicit rook notation (Rxe5) OR rook icon + capture
-          const isRookCapture = /R[a-h]?x/.test(moveText) || (hasRookIcon && isCapture);
+      console.log('RookSacAlert: Move analysis - hasRookIcon:', !!hasRookIcon, 'isCapture:', isCapture);
 
-          // Create unique key for this move
-          const moveKey = moveText.trim() + '_' + Date.now();
+      // Check for explicit rook notation (Rxe5) OR rook icon + capture
+      const isRookCapture = /R[a-h]?x/.test(moveText) || (hasRookIcon && isCapture);
 
-          if (isRookCapture && !processedMoves.has(moveText.trim())) {
-            console.log('RookSacAlert: ROOK SACRIFICE DETECTED!', moveText, 'hasRookIcon:', !!hasRookIcon);
-            processedMoves.add(moveText.trim());
-            lastProcessedMove = moveText;
-            playRookSacrificeVideo(moveText.trim());
-          }
-        }
-      });
-    });
+      if (isRookCapture && !processedMoves.has(moveText.trim())) {
+        console.log('RookSacAlert: ROOK SACRIFICE DETECTED!', moveText);
+        processedMoves.add(moveText.trim());
+        lastProcessedMove = moveText.trim();
+        playRookSacrificeVideo(moveText.trim());
+      }
+    }
   });
 
   moveListObserver.observe(moveList, {
