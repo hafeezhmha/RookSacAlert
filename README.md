@@ -90,6 +90,10 @@ Possible improvements:
 - Statistics dashboard
 - Export sacrifice history
 
+## Author
+
+Created by [hafeezhmha](https://github.com/hafeezhmha)
+
 ## Credits
 
 Inspired by chess commentary and the dramatic moments of rook sacrifices in competitive chess.
