@@ -132,11 +132,27 @@ function canAttack(fromCoord, toCoord, pieceType) {
 }
 
 // Alternative: Monitor move list for rook captures
-function monitorMoveList() {
-  const moveList = document.querySelector('.move-list-component, vertical-move-list');
-  if (!moveList) return;
+let moveListObserver = null;
 
-  const observer = new MutationObserver((mutations) => {
+function monitorMoveList() {
+  // Try multiple selectors for different chess.com layouts
+  const moveList = document.querySelector('.move-list-component') ||
+                    document.querySelector('vertical-move-list') ||
+                    document.querySelector('.moves') ||
+                    document.querySelector('[class*="move-list"]');
+
+  if (!moveList) {
+    // Retry after a delay if move list not found yet
+    setTimeout(monitorMoveList, 2000);
+    return;
+  }
+
+  // Disconnect existing observer if any
+  if (moveListObserver) {
+    moveListObserver.disconnect();
+  }
+
+  moveListObserver = new MutationObserver((mutations) => {
     mutations.forEach(mutation => {
       mutation.addedNodes.forEach(node => {
         if (node.nodeType === 1) {
@@ -152,8 +168,25 @@ function monitorMoveList() {
     });
   });
 
-  observer.observe(moveList, { childList: true, subtree: true });
+  moveListObserver.observe(moveList, { childList: true, subtree: true });
 }
+
+// Clear processed moves when navigating to new game
+function clearProcessedMoves() {
+  processedMoves.clear();
+}
+
+// Detect URL changes (new game loaded)
+let lastUrl = location.href;
+new MutationObserver(() => {
+  const currentUrl = location.href;
+  if (currentUrl !== lastUrl) {
+    lastUrl = currentUrl;
+    clearProcessedMoves();
+    // Reinitialize move list monitoring for new game
+    setTimeout(monitorMoveList, 1000);
+  }
+}).observe(document, { subtree: true, childList: true });
 
 // Play the video overlay
 function playRookSacrificeVideo(moveText = "Rook sacrifice") {
@@ -161,16 +194,22 @@ function playRookSacrificeVideo(moveText = "Rook sacrifice") {
   if (window.rookSacVideoPlaying) return;
   window.rookSacVideoPlaying = true;
 
-  // Notify popup about the sacrifice
+  // Notify popup about the sacrifice (ignore errors if popup closed)
   chrome.runtime.sendMessage({
     action: "rookSacrificeDetected",
     move: moveText,
     url: window.location.href
-  });
+  }).catch(() => {});
 
   // Check if sound is enabled
   chrome.storage.local.get({ enableSound: true }, (result) => {
     const muted = !result.enableSound;
+
+    // Remove any existing overlay first
+    const existingOverlay = document.getElementById('rook-sac-overlay');
+    if (existingOverlay) {
+      existingOverlay.remove();
+    }
 
     // Create overlay
     const overlay = document.createElement('div');
@@ -187,18 +226,29 @@ function playRookSacrificeVideo(moveText = "Rook sacrifice") {
 
     const video = document.getElementById('rook-sac-video');
 
-    video.onended = () => {
-      overlay.remove();
+    const cleanupOverlay = () => {
+      const overlayElement = document.getElementById('rook-sac-overlay');
+      if (overlayElement) {
+        overlayElement.remove();
+      }
       window.rookSacVideoPlaying = false;
+    };
+
+    video.onended = cleanupOverlay;
+    video.onerror = () => {
+      console.error('Failed to load rook sacrifice video');
+      cleanupOverlay();
     };
 
     // Fallback: remove after 10 seconds even if video doesn't end
     setTimeout(() => {
       if (document.getElementById('rook-sac-overlay')) {
-        overlay.remove();
-        window.rookSacVideoPlaying = false;
+        cleanupOverlay();
       }
     }, 10000);
+
+    // Allow clicking overlay to dismiss
+    overlay.addEventListener('click', cleanupOverlay);
   });
 }
 
