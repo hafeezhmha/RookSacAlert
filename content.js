@@ -180,7 +180,9 @@ function monitorMoveList() {
   let lastProcessedMove = '';
 
   moveListObserver = new MutationObserver((mutations) => {
+    console.log('RookSacAlert: Mutations detected:', mutations.length);
     mutations.forEach(mutation => {
+      console.log('RookSacAlert: Mutation type:', mutation.type, 'addedNodes:', mutation.addedNodes.length);
       mutation.addedNodes.forEach(node => {
         if (node.nodeType === 1) {
           const moveText = node.textContent || '';
@@ -223,7 +225,12 @@ function monitorMoveList() {
     });
   });
 
-  moveListObserver.observe(moveList, { childList: true, subtree: true });
+  moveListObserver.observe(moveList, {
+    childList: true,
+    subtree: true,
+    characterData: true,
+    attributes: true
+  });
 }
 
 // Clear processed moves when navigating to new game
