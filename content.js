@@ -2,6 +2,7 @@
 
 // Track the board state and moves
 let lastBoardState = null;
+let processedMoves = new Set();
 
 // Function to get the current board state from chess.com
 function getBoardState() {
@@ -172,7 +173,7 @@ function monitorMoveList() {
     moveListObserver.disconnect();
   }
 
-  let lastProcessedMoveId = '';
+  let lastProcessedMove = '';
 
   moveListObserver = new MutationObserver((mutations) => {
     // Check the entire move list for the latest move with selected class
@@ -181,18 +182,8 @@ function monitorMoveList() {
     if (selectedMove) {
       const moveText = selectedMove.textContent || '';
 
-      // Skip if empty
-      if (!moveText.trim()) {
-        return;
-      }
-
-      // Create unique ID based on move's position in the list
-      const moveId = selectedMove.getAttribute('data-node-id') ||
-                     selectedMove.getAttribute('data-ply') ||
-                     Array.from(moveList.querySelectorAll('.node')).indexOf(selectedMove).toString();
-
-      // Skip if this is the same move we just processed
-      if (moveId === lastProcessedMoveId) {
+      // Skip if empty or already processed
+      if (!moveText.trim() || moveText.trim() === lastProcessedMove) {
         return;
       }
 
@@ -207,12 +198,10 @@ function monitorMoveList() {
       // Check for explicit rook notation (Rxe5) OR rook icon + capture
       const isRookCapture = /R[a-h]?x/.test(moveText) || (hasRookIcon && isCapture);
 
-      if (isRookCapture) {
-        lastProcessedMoveId = moveId;
+      if (isRookCapture && !processedMoves.has(moveText.trim())) {
+        processedMoves.add(moveText.trim());
+        lastProcessedMove = moveText.trim();
         playRookSacrificeVideo(moveText.trim());
-      } else {
-        // Update last processed ID even for non-rook moves to prevent re-triggering
-        lastProcessedMoveId = moveId;
       }
     }
   });
@@ -225,12 +214,18 @@ function monitorMoveList() {
   });
 }
 
+// Clear processed moves when navigating to new game
+function clearProcessedMoves() {
+  processedMoves.clear();
+}
+
 // Detect URL changes (new game loaded)
 let lastUrl = location.href;
 new MutationObserver(() => {
   const currentUrl = location.href;
   if (currentUrl !== lastUrl) {
     lastUrl = currentUrl;
+    clearProcessedMoves();
     // Reinitialize move list monitoring for new game
     setTimeout(monitorMoveList, 1000);
   }
