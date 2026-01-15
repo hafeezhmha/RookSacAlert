@@ -142,10 +142,13 @@ function monitorMoveList() {
                     document.querySelector('[class*="move-list"]');
 
   if (!moveList) {
+    console.log('RookSacAlert: Move list not found, retrying...');
     // Retry after a delay if move list not found yet
     setTimeout(monitorMoveList, 2000);
     return;
   }
+
+  console.log('RookSacAlert: Monitoring move list:', moveList);
 
   // Disconnect existing observer if any
   if (moveListObserver) {
@@ -157,9 +160,11 @@ function monitorMoveList() {
       mutation.addedNodes.forEach(node => {
         if (node.nodeType === 1) {
           const moveText = node.textContent || '';
+          console.log('RookSacAlert: New move detected:', moveText);
 
           // Check for rook captures: Rxe5, Rxf7+, R captures notation
           if (/R[a-h]?x/.test(moveText) && !processedMoves.has(moveText)) {
+            console.log('RookSacAlert: ROOK SACRIFICE DETECTED!', moveText);
             processedMoves.add(moveText);
             playRookSacrificeVideo(moveText.trim());
           }
