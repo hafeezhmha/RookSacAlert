@@ -2,7 +2,9 @@
 
 ## Overview
 
-This Chrome extension automatically detects when a rook sacrifice occurs during chess games on chess.com and plays a dramatic video clip saying "and he sacs the rook". Whether you're playing live games, reviewing past games, or analyzing positions, the extension will catch every rook sacrifice moment.
+Ever make a rook sacrifice and wish Levy Rozman would pop up and yell "AND HE SACS THE ROOK!"? Well, now he does.
+
+This Chrome extension automatically detects when a rook sacrifice occurs during your chess.com games and plays the iconic clip. Every. Single. Time. Whether you're playing live, reviewing games, or analyzing positions, RookSacAlert is there to hype up your sacrifices like you're in a GothamChess video.
 
 ## Features
 
