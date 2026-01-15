@@ -162,9 +162,22 @@ function monitorMoveList() {
           const moveText = node.textContent || '';
           console.log('RookSacAlert: New move detected:', moveText);
 
-          // Check for rook captures: Rxe5, Rxf7+, R captures notation
-          if (/R[a-h]?x/.test(moveText) && !processedMoves.has(moveText)) {
-            console.log('RookSacAlert: ROOK SACRIFICE DETECTED!', moveText);
+          // Check if this node has a rook icon/indicator
+          const hasRookIcon = node.querySelector && (
+            node.querySelector('[data-piece="r"]') ||
+            node.querySelector('.icon-font-chess-rook') ||
+            node.querySelector('[class*="rook"]') ||
+            (node.className && node.className.includes && node.className.includes('rook'))
+          );
+
+          // Check for captures (x in the notation)
+          const isCapture = /x/.test(moveText);
+
+          // Check for explicit rook notation (Rxe5) OR rook icon + capture
+          const isRookCapture = /R[a-h]?x/.test(moveText) || (hasRookIcon && isCapture);
+
+          if (isRookCapture && !processedMoves.has(moveText)) {
+            console.log('RookSacAlert: ROOK SACRIFICE DETECTED!', moveText, 'hasRookIcon:', !!hasRookIcon);
             processedMoves.add(moveText);
             playRookSacrificeVideo(moveText.trim());
           }
